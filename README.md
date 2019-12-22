@@ -1,5 +1,13 @@
 # Easy Markdown to Github Pages
 
+
+<ul>
+{% for page in site.collections.rails_notes.docs %}
+  <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+{% endfor %}
+</ul
+
+
 ## Introduction
 
 This little guide demonstrate how to turn any [Github](http://github.com) repository with a bunch of [Markdown](https://en.wikipedia.org/wiki/Markdown) files into a simple website using [Github Pages](https://pages.github.com/) and [Jekyll](https://jekyllrb.com/).

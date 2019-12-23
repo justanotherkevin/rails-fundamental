@@ -1,6 +1,553 @@
+# generating an rails app
+
 We ensure that the right database is used by passing the optional -d flag so we can choose postgresql as our database.
 ```
 # You can use the following to generate a rails app:
 # replace app-name with what you want to call it
 rails new app-name -d postgresql
 ```
+___
+
+# models
+when generating a model rails will also generate a migration file, we walk you through whats in the migration file, we then move on to actually creating objects with the model and save it to the database.
+```
+# we can use this command to generate models in our app
+rails generate model post title:string body:text
+```
+
+Once you run the above command it will generate a few files for you. The one to note is the migration file.
+
+```
+class CreatePosts < ActiveRecord::Migration
+  def change
+    create_table :posts do |t|
+      t.string :title
+      t.text :body
+
+      t.timestamps null: false
+    end
+  end
+end
+```
+
+Migrations only run once on a database. They help you maintain your database to ensure consistency across your development, and production environment. The timestamps will help us track when an object is created or updated.
+```
+class Post < ActiveRecord::Base
+end
+```
+
+
+To play around with the `Post` model we can boot into the rails console.
+```
+# this will put you into the rails console
+rails c
+```
+
+We can create our first post with the code below
+
+```
+post = Post.create(title: "Hello World!", body: "Test Body")
+# this will change the title of the object
+post.title = "Change the title"
+# this will persist the change to the database
+post.save
+# we can also create the post using
+post = Post.new(title: "Another Post", body: "Another post body")
+post.save
+```
+___
+
+# MVC workflow
+Its foundational to understand how MVC works in Rails. Once this concept is understood it will make it very easy for anyone to create and design their own application. Rails convention over configuration concepts will start to play a big role in the MVC workflow.
+
+We start off by generating the controller.
+> Controller will be with "s" and model is singlar
+```
+# this will generate the posts_controller.rb
+rails g controller posts
+```
+
+Once we run the above command it will give us a few files, the one to note is the `posts_controller.rb`
+```
+class PostsController < ApplicationController
+end
+```
+The next thing we will need to do is add `resources` to our `config/routes.rb`
+```
+Rails.application.routes.draw do
+  resources :posts
+end
+```
+By running `rake routes` you'll see how it maps to each of our controller actions.
+```
+     posts  GET    /posts(.:format)                            posts#index
+            POST   /posts(.:format)                            posts#create
+  new_post  GET    /posts/new(.:format)                        posts#new
+edit_post   GET    /posts/:id/edit(.:format)                   posts#edit
+      post  GET    /posts/:id(.:format)                        posts#show
+            PATCH  /posts/:id(.:format)                        posts#update
+            PUT    /posts/:id(.:format)                        posts#update
+            DELETE /posts/:id(.:format)                        posts#destroy
+```
+
+
+# set up assets
+ setup twitter bootstrap in a rails application. At Codemy we use Sass and CoffeeScript by default.
+ You can check out bootstrap [here](https://getbootstrap.com/)
+
+We start out by renaming the `assets/javascripts/application.js` to `assets/javascripts/application.coffee` we then fill it up with the following content.
+```
+#= jquery
+#= jquery_ujs
+#= turbolinks
+```
+
+To setup bootstrap in your rails app simply add the gem to your `Gemfile`
+
+```
+gem 'bootstrap-sass'
+```
+then update the gems with `bundle install`
+
+To activate bootstrap in our application simply rename `assets/stylesheets/application.css `to `assets/stylesheets/application.sass` and then add the following line:
+
+```
+@import "bootstrap-sprockets"
+@import "bootstrap"
+```
+
+
+# CRUD part 1
+In this episode we show you how to create a record in the database using the UI. We leverage what we learned about MVC to create features in the interface that will allow us to create records in our database. We show you how the routes generated in the rails app map to the controller actions, we also show you how to setup and install a debugging tool that will allow you to put break points into your rails app for debug purposes.
+```
+// app/assets/stylesheets/posts.sass
+div.post
+  border-bottom: 1px solid #eee
+```
+We now need to import the posts.sass into the application.sass file.
+```
+// app/assets/stylesheets/application.sass
+@import "posts"
+```
+
+If we focus on the HTTP `POST` we can see that it maps to the `posts#create `action. However before we can implement the create action in the `posts_controller.rb` we must have some kind of form that will make the post request. So let's start by implementing the form which will be generated by the `new` action in the posts controller
+
+```
+# app/controllers/posts_controller.rb
+class PostsController < ApplicationController
+  def index
+    @posts = Post.all
+  end
+
+  def new
+    @post = Post.new
+  end
+end
+```
+Once our new action is in place the next thing we need to do will be to create the view.
+```
+# app/views/posts/new.html.erb
+<%= form_for @post do |f| %>
+  <div class='form-group'>
+    <%= f.label :title %>
+    <%= f.text_field :title, class: 'form-control' %>
+  </div>
+  <div class='form-group'>
+    <%= f.label :body %>
+    <%= f.text_area :body, class: 'form-control' %>
+  </div>
+  <div class='form-group'>
+    <%= f.submit "Save", class: 'btn btn-block btn-success' %>
+  </div>
+<% end %>
+```
+Once our form is ready to go we can implement the create action. We need to use strong parameters to ensure that our controller is secure. So we will also need to implement the strong parameter.
+```
+# app/controllers/posts_controller.rb
+# ...
+  def create
+    @post = Post.new(post_params)
+  end
+  private
+
+  def post_params
+    params.require(:post).permit(:title, :body)
+  end
+# ...
+```
+
+## Debugging Tools
+To get a better understanding and have the ability to debug our application better we will add a tool to our app.
+
+```
+# Gemfile
+group :development, :test do
+  # ...
+  gem 'pry-rails'
+end
+```
+
+
+The `pry-rails` gem will allow us to add break points to our app and dig into the life cycle of a request. Which can be very handy when we're learning how the whole MVC idea works together.
+
+Adding Break Points
+To add breakpoints to the app we just do the following
+```
+#  def create
+#    @post = Post.new(post_params)
+     binding.pry
+#  end
+```
+Completing our Create Action
+Once we have an understanding of how the request is passed and processed in the controller action we can save our post. Let's go ahead and complete our create action.
+
+```
+  def create
+    @post = Post.new(post_params)
+    if @post.save
+      redirect_to posts_path
+    else
+      # render the form again
+    end
+  end
+```
+___
+# CRUD operations part 2
+
+## Edit Action
+```
+# app/controllers/posts_controller.rb
+class PostsController < ApplicationController
+  #...
+  def edit
+    @post = Post.where(id: params[:id]).first
+  end
+  #...
+end
+```
+You may be wondering where we will get the `params[:id]` from. It will be passed from the url. Which means when we generate the edit link it needs to have the `:id` somewhere in the path. For example `posts/2/edit` in this case the id is 2.
+
+To generate the edit link in the view we'll need to edit our view.
+```
+# app/views/posts/_post.html.erb
+#...
+<p>
+  <%= link_to "Edit", edit_post_path(post) %>
+</p>
+#...
+```
+The link_to will generate the path we need in order to pass the :id back to our controller.
+
+## Update Action
+```
+# app/controllers/posts_controller.rb
+#...
+def update
+  @post = Post.where(id: params[:id]).first
+  if @post.update_attributes(post_params)
+    redirect_to posts_path
+  else
+    # render the edit form again
+  end
+end
+#...
+```
+
+Let's try this out and see what happens!. One thing to note is it might be a good idea to order our index action with updated_at DESC so that the last updated post comes up first.
+
+```
+# app/controllers/posts_controller.rb
+#...
+def index
+  @posts = Post.order("updated_at DESC").all
+end
+```
+
+## destroy action
+```
+# app/controllers/posts_controller.rb
+def destroy
+  @post = Post.where(id: params[:id]).first
+  if @post.destroy
+    redirect_to posts_path
+  else
+
+  else
+end
+```
+We need to render the link that will map to the destroy action
+```
+# app/views/posts/_post.html.erb
+#...
+<p>
+  <%= link_to "Destroy", post_path(post), method: :delete %>
+</p>
+```
+
+Next is the show page. The show page is generally used to display the detail of the object (in this case the post). Lets start off creating the post show page
+
+```
+# app/views/posts/show.html.erb
+<h1>
+  <%= @post.title %>
+</h1>
+<p>
+  <%= @post.body %>
+</p>
+```
+
+
+___
+
+# one to many relationships
+
+## Generating the Comment Model
+```
+rails g model comment body:text post:references
+```
+
+```
+# app/models/comment.rb
+class Comment < ActiveRecord::Base
+  belongs_to :post
+end
+```
+
+```
+class CreateComments < ActiveRecord::Migration
+  def change
+    create_table :comments do |t|
+      t.text :body
+      t.references :post, index: true, foreign_key: true
+
+      t.timestamps, null: false
+    end
+  end
+end
+```
+
+To actually modify our database we need to run the migration command
+```
+rails db:migrate
+```
+
+We also need to tell the `Post` model about it's children
+```
+# app/models/post.rb
+class Post < ActiveRecord::Base
+  has_many :comments
+end
+```
+
+Boot up Rails Console and Let's Play
+```
+rails c
+# load our post
+post = Post.first
+# lets create a comment
+comment = post.comments.build
+```
+
+
+At this point we have a comment in memory and it is associated with our post however the record doesn't exist in the database yet, to commit the object to the database we need to save our comment
+
+```
+# this will persist our comment to the database
+comment.save
+# we can destroy the comment
+comment.destroy
+```
+
+
+Lets try and create a comment with an actual body.
+```
+comment = post.comments.build(body: "First!")
+comment.save
+# we can also create the comment in 1 shot
+post.comments.create(body: "Second")
+```
+
+We can load the comments for the particular post by using
+
+```
+post.comments
+```
+Updating our Views
+```
+# app/views/posts/_post.html.erb
+<p>
+  Comments(<%= post.comments.count %>)
+</p>
+```
+
+In our post show page we can even render out the comments section!
+```
+# app/views/posts/show.html.erb
+# ...
+<hr>
+<h2>Comments</h2>
+<% @post.comments.each do |c| %>
+ <div class='panel panel-default'>
+   <div class='panel-body'>
+     <%= comment.body %>
+   </div>
+ </div>
+<% end %>
+```
+
+___
+# nested resources
+
+in this episode we show you how nested resources work. We talk about nested routing and how that translate over to scoping inside the controller. We need to do this to make sure we're working with the right set of objects and that objects we create have the correct parent-child relationship.
+
+```
+Rails.application.routes.draw do
+  resources :posts do
+    resources :comments
+  end
+end
+```
+
+
+
+To see what changes were made to our routes we can type `rake routes` or `rails routes`
+
+Generating the Comments Controller
+To generate our comment we can use `rails g controller comments` in the command line.
+
+Let's start by filling out our create action.
+```
+# app/controllers/comments_controller.rb
+class CommentsController < ApplicationController
+  def create
+    @post = Post.where(id: params[:post_id]).first
+    @comment = @post.comments.build(comment_params)
+
+    if @comment.save
+      redirect_to post_path(@post)
+    else
+      # error handling
+    end
+  end
+
+  private
+
+  def comment_params
+    params.require(:comment).permit(:body)
+  end
+end
+```
+Implementing the Form
+```
+# app/views/posts/show.html.erb
+# ...
+<%= form_for [@post, @post.comments.build] do |f| %>
+  <div class='form-group'>
+    <%= f.text_area :body, class: 'form-control' %>
+  </div>
+  <div class='actions'>
+    <%= f.submit "Save", class: 'btn btn-success' %>
+  </div>
+<% end %>
+```
+
+___
+# many to many relationships
+These can come in handy when you want to connect many of one kind of object to many of another kind of object. A good example is tags. Each tag in your site may be linked to many posts and at the same time each of the posts in your site can have many tags.
+> Each tag in your site may be linked to many posts and at the same time each of the posts in your site can have many tags.
+```
+rails g model tag name:string
+```
+
+We should now see the `tag.rb` model in our application with the following content
+
+```
+class Tag < ActiveRecord::Base
+end
+```
+
+To creat a many to many relationship we also need a join table that will track the reference between both the `Post` and the `Tag` to generate the join model we will use the following command.
+```
+rails g model tagging post:references tag:references
+```
+We will get the `Tagging` model in our app.
+```
+class Tagging < ActiveRecord::Base
+  belongs_to :post
+  belongs_to :tag
+end
+```
+We also get a migration file for the join model that looks like this
+```
+class CreateTaggings < ActiveRecord::Migration
+  def change
+    create_table :taggings do |t|
+      t.references :post, index: true, foreign_key: true
+      t.references :tag, index: true, foreign_key: true
+
+      t.timestamps null: false
+    end
+  end
+end
+```
+We need to finish off the relationship setup by filling out our Tag Model with
+```
+class Tag < ActiveRecord::Base
+  has_many :taggings
+  has_many :posts, through: :taggings
+end
+```
+
+Now for the Post model
+```
+class Post < ActiveRecord::Base
+  # ...
+
+  has_many :taggings
+  has_many :tags, through: :taggings
+end
+```
+The last step in our setup would be to simply `run rake db:migrate` or if you are using Rails 5 and above you can use `rails db:migrate`
+
+Let's hop into `rails c`
+```
+post = Post.first
+tag = Tag.create(name: "Ruby")
+# To assign the tag to the post we can simply do
+post.tags = [tag]
+post.save
+# We can see the tags assigned to a post by calling
+post.tags
+```
+If we re-assign the post.tags it will replace the old relationship in the database automatically, for example.
+
+```
+new_tag = Tag.create(name: "Some Other Tag")
+post.tags = [new_tag]
+post.save
+```
+
+The example above will remove the previous tag from this post. We can append more tag instead but we have to change the operator
+
+```
+ruby_tag = Tag.where(name: "Ruby").first
+post.tags += [ruby_tag]
+# We should now see both tags
+post.tags
+```
+Rendering out the Tags
+Now let's render out the tags for the post
+```
+# app/views/posts/_post.html.erb
+<%= div_for post, class: 'col-md-8 col-md-offset-2' do %>
+# ...
+  <ul>
+    <% post.tags.each do |tag| %>
+      <li>
+        <%= tag.name %>
+      </li>
+    <% end %>
+  </ul>
+<% end >
+```
+

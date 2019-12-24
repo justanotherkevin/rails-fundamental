@@ -1,5 +1,5 @@
+[Demo](https://polymer940c.github.io/rails-fundamental/)
 # Easy Markdown to Github Pages
-
 
 <ul>
 {% for page in site.collections.rails_notes.docs %}

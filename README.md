@@ -87,6 +87,7 @@ Since the purpose of this guide is to demonstrate how to publish multiple Markdo
 * [Escalivada](./recipes/Escalivada.md)
 * [Gazpacho](./recipes/Gazpacho.md)
 * [Pasta all'amatriciana](./recipes/Pasta_all_amatriciana.md)
+* [ruby notes](./rails_notes/1_generating_app.md)
 
 ## Contributing
 

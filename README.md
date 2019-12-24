@@ -1,11 +1,4 @@
-[Demo](https://polymer940c.github.io/rails-fundamental/)
-# Easy Markdown to Github Pages
-
-<ul>
-{% for page in site.collections.rails_notes.docs %}
-  <li><a href="{{ page.url }}">{{ page.title }}</a></li>
-{% endfor %}
-</ul
+# Easy Markdown to Github Pages [Demo](https://polymer940c.github.io/rails-fundamental/)
 
 
 ## Introduction

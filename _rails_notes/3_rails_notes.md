@@ -55,3 +55,42 @@ has_many  :comments
 <!-- if article is destroy, comments are also deleted -->
 has_many  :comments, dependent: :destroy
 ```
+
+
+What is a enum in model
+[link](https://api.rubyonrails.org/v5.2.4.1/classes/ActiveRecord/Enum.html)
+```
+class Conversation < ActiveRecord::Base
+  enum status: [ :active, :archived ]
+end
+
+# conversation.update! status: 0
+conversation.active!
+conversation.active? # => true
+conversation.status  # => "active"
+
+# conversation.update! status: 1
+conversation.archived!
+conversation.archived? # => true
+conversation.status    # => "archived"
+
+# conversation.status = 1
+conversation.status = "archived"
+
+conversation.status = nil
+conversation.status.nil? # => true
+conversation.status      # => nil
+```
+
+Of course, you can also query them directly if the scopes don't fit your needs:
+```
+Conversation.where(status: [:active, :archived])
+Conversation.where.not(status: :active)
+```
+
+You can set the default value from the database declaration, like:
+```
+create_table :conversations do |t|
+  t.column :status, :integer, default: 0
+end
+```

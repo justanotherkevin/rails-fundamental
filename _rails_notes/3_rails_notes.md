@@ -94,3 +94,27 @@ create_table :conversations do |t|
   t.column :status, :integer, default: 0
 end
 ```
+
+form_with; hidden_field; 
+```
+//controller
+...
+def new
+  owner = User.all.sample
+  @post = Post.new(user: owner)
+end
+
+// new.haml
+= form_with(model: @post, local: true) do |form|
+  = form.hidden_field(:user_id)
+  %p
+    = form.label :subject
+    %br
+    = form.text_field :subject
+  %p
+    = form.label :body
+    %br
+    = form.text_area :body
+  %button
+    = form.submit
+```

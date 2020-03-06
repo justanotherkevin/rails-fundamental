@@ -118,3 +118,19 @@ end
   %button
     = form.submit
 ```
+
+Show / render comments on Post show template
+```
+// show.haml
+@post.commments.each do |comment| 
+  %p= comment.body
+  %p= comment.user.first_name
+  
+//turn that into neater//
+// show.haml
+= render @post.comments
+
+// create file at app/views/comments/_comment.haml
+%p= comment.body
+%p= comment.user.first_name
+```

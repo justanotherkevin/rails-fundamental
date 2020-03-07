@@ -56,7 +56,8 @@ has_many  :comments
 has_many  :comments, dependent: :destroy
 ```
 
-
+Other notes
+--- 
 What is a enum in model
 [link](https://api.rubyonrails.org/v5.2.4.1/classes/ActiveRecord/Enum.html)
 ```

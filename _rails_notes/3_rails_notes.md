@@ -151,6 +151,7 @@ end
 ```
 If the migration name is of the form "AddColumnToTable" or "RemoveColumnFromTable" and is followed by a list of column names and types then a migration containing the appropriate add_column and remove_column statements will be created.
 ```
+// add or remove a cloumn in table
 rails generate migration AddPartNumberToProducts part_number:string
 
 // migration from example ☝️

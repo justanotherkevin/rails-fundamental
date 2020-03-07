@@ -134,3 +134,28 @@ Show / render comments on Post show template
 %p= comment.body
 %p= comment.user.first_name
 ```
+creating migrations
+adding a column into table, association 
+```
+rails generate migration AddPostRefToComments post:references
+```
+```
+// creates empty migration
+rails generate migration AddPartNumberToProducts
+
+class AddPartNumberToProducts < ActiveRecord::Migration[5.0]
+  def change
+  end
+end
+```
+If the migration name is of the form "AddColumnToTable" or "RemoveColumnFromTable" and is followed by a list of column names and types then a migration containing the appropriate add_column and remove_column statements will be created.
+```
+rails generate migration AddPartNumberToProducts part_number:string
+
+// migration from example ☝️
+class AddPartNumberToProducts < ActiveRecord::Migration[5.0]
+  def change
+    add_column :products, :part_number, :string
+  end
+end
+```

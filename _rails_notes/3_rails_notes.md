@@ -161,3 +161,26 @@ class AddPartNumberToProducts < ActiveRecord::Migration[5.0]
   end
 end
 ```
+
+### Create a zip file
+```
+temp_file = Tempfile.new('IT_DONT_MATTER_WHAT_YOU_CALL_IT_HERE.zip')
+begin
+  Zip::OutputStream.open(temp_file) { |zos| }
+  #Add files to the zip file as usua
+  Zip::File.open(temp_file.path, Zip::File::CREATE) do |zip| 
+  #Put files in here
+    obj.each do |key, value|
+      zip.add("FILE NAME", THE_FILE)
+    end
+  end
+  #Read the binary data from the file
+  zip_data = File.read(temp_file.path)
+  #Send the data to the browser as an attachment
+  send_data(zip_data, :type => 'application/zip', :filename => 'ZIPFILENAME.zip')
+ensure
+  #Close and delete the temp file
+  temp_file.close
+  temp_file.unlink
+end
+```

@@ -163,6 +163,7 @@ end
 ```
 
 ### Create a zip file
+--- 
 ```
 temp_file = Tempfile.new('IT_DONT_MATTER_WHAT_YOU_CALL_IT_HERE.zip')
 begin

@@ -56,8 +56,9 @@ has_many  :comments
 has_many  :comments, dependent: :destroy
 ```
 
-Other notes
 --- 
+Other notes
+
 What is a enum in model
 [link](https://api.rubyonrails.org/v5.2.4.1/classes/ActiveRecord/Enum.html)
 ```
@@ -162,8 +163,8 @@ class AddPartNumberToProducts < ActiveRecord::Migration[5.0]
 end
 ```
 
-### Create a zip file
 --- 
+### Create a zip file
 ```
 temp_file = Tempfile.new('IT_DONT_MATTER_WHAT_YOU_CALL_IT_HERE.zip')
 begin

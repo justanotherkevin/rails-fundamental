@@ -186,3 +186,7 @@ ensure
   temp_file.unlink
 end
 ```
+
+---
+### edit/ add secret/ credential keys
+`EDITOR="code --wait" rails credentials:edit`
